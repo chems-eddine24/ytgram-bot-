@@ -27,7 +27,7 @@ async def format_choice_callback(update: Update, context: ContextTypes.DEFAULT_T
         await msg.delete()
 
     except ValueError as e:
-        await query.edit_message_text(f"❌ Error: {e}")
+        await query.edit_message_text(f"Error: {e}")
 
 
 async def quality_choice_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -37,7 +37,7 @@ async def quality_choice_callback(update: Update, context: ContextTypes.DEFAULT_
     data = query.data
     _, quality, url = data.split(":", 2)
 
-    await query.edit_message_text(f"⏳ Downloading {quality}p video...")
+    await query.edit_message_text(f"Downloading {quality}p video...")
 
     try:
         filepath = await download_youtube_video(url, quality=quality)
@@ -45,10 +45,10 @@ async def quality_choice_callback(update: Update, context: ContextTypes.DEFAULT_
         os.remove(filepath)
         await query.message.delete()
     except ValueError as e:
-        await query.edit_message_text(f"❌ Error: {e}")
+        await query.edit_message_text(f"Error: {e}")
 
 
 async def cancel_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text("❌ Cancelled.")
+    await query.edit_message_text("Cancelled.")
