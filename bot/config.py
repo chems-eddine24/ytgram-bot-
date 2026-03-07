@@ -7,4 +7,6 @@ load_dotenv()
 class Settings:
     """Bot settings."""
     TOKEN = os.getenv("TOKEN")
-    DOWNLOADS_DIR = DOWNLOADS_DIR = Path("downloads")
+    DOWNLOADS_DIR = Path("downloads")
+
+settings = Settings()
