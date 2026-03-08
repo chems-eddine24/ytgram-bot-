@@ -1,25 +1,36 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
-import re
+from services.media_service import detect_platform
 
-YOUTUBE_REGEX = re.compile(
-    r"(https?://)?(www\.)?(youtube\.com/watch\?v=|youtu\.be/|youtube\.com/shorts/)[\w\-]+"
-)
+PLATFORM_ICONS = {
+    "youtube": "▶️ YouTube",
+    "tiktok": "🎵 TikTok",
+    "instagram": "📸 Instagram",
+    "facebook": "📘 Facebook",
+}
 
 
 async def url_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    text = update.message.text
+    text = update.message.text.strip()
+    platform = detect_platform(text)
 
-    if not YOUTUBE_REGEX.match(text):
+    if not platform:
         await update.message.reply_text(
-            "❌ That doesn't look like a valid YouTube URL.\nSend me a YouTube link to get started."
+            "❌ Unsupported URL.\n\n"
+            "I support links from:\n"
+            "• ▶️ YouTube\n"
+            "• 🎵 TikTok\n"
+            "• 📸 Instagram\n"
+            "• 📘 Facebook"
         )
         return
 
+    platform_label = PLATFORM_ICONS[platform]
+
     keyboard = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("🎵 MP3 Audio", callback_data=f"audio:{text}"),
-            InlineKeyboardButton("🎬 MP4 Video", callback_data=f"video:{text}"),
+            InlineKeyboardButton("🎵 Audio (MP3)", callback_data=f"audio:{text}"),
+            InlineKeyboardButton("🎬 Video (MP4)", callback_data=f"video:{text}"),
         ],
         [
             InlineKeyboardButton("🎬 360p", callback_data=f"quality:360:{text}"),
@@ -30,13 +41,14 @@ async def url_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     ])
 
     await update.message.reply_text(
-        "🎯 *What format do you want?*",
+        f"*{platform_label} link detected\!*\n\nWhat would you like to download?",
         reply_markup=keyboard,
-        parse_mode="Markdown"
+        parse_mode="MarkdownV2"
     )
 
 
 async def unknown_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        "❓ I only understand YouTube URLs and commands.\nType /help to see what I can do."
+        "❓ Send me a link from YouTube, TikTok, Instagram or Facebook.\n"
+        "Type /help to see all commands."
     )
