@@ -2,7 +2,6 @@ import uuid
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from services.media_service import detect_platform
-
 PLATFORM_ICONS = {
     "youtube": "▶️ YouTube",
     "tiktok": "🎵 TikTok",
