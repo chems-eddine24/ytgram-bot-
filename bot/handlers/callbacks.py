@@ -1,7 +1,13 @@
 import os
 from telegram import Update
 from telegram.ext import ContextTypes
-from services.youtube_service import download_youtube_audio, download_youtube_video
+from services.media_service import download_video, download_audio
+
+MAX_SIZE_BYTES = 50 * 1024 * 1024
+
+
+def _check_size(filepath: str) -> bool:
+    return os.path.getsize(filepath) <= MAX_SIZE_BYTES
 
 
 async def format_choice_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -11,23 +17,32 @@ async def format_choice_callback(update: Update, context: ContextTypes.DEFAULT_T
     data = query.data
     action, url = data.split(":", 1)
 
-    msg = await query.edit_message_text("⏳ Downloading...")
+    msg = await query.edit_message_text("Downloading...")
 
+    filepath = None
     try:
         if action == "audio":
-            filepath = await download_youtube_audio(url)
+            filepath = await download_audio(url)
+            if not _check_size(filepath):
+                await query.edit_message_text("File exceeds Telegram's 50MB limit.")
+                return
             await query.message.reply_audio(audio=open(filepath, "rb"))
-            os.remove(filepath)
 
         elif action == "video":
-            filepath = await download_youtube_video(url)
+            filepath = await download_video(url)
+            if not _check_size(filepath):
+                await query.edit_message_text("File exceeds Telegram's 50MB limit.")
+                return
             await query.message.reply_video(video=open(filepath, "rb"))
-            os.remove(filepath)
 
         await msg.delete()
 
     except ValueError as e:
         await query.edit_message_text(f"Error: {e}")
+
+    finally:
+        if filepath and os.path.exists(filepath):
+            os.remove(filepath)
 
 
 async def quality_choice_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -39,13 +54,21 @@ async def quality_choice_callback(update: Update, context: ContextTypes.DEFAULT_
 
     await query.edit_message_text(f"Downloading {quality}p video...")
 
+    filepath = None
     try:
-        filepath = await download_youtube_video(url, quality=quality)
+        filepath = await download_video(url, quality=quality)
+        if not _check_size(filepath):
+            await query.edit_message_text("File exceeds Telegram's 50MB limit.")
+            return
         await query.message.reply_video(video=open(filepath, "rb"))
-        os.remove(filepath)
         await query.message.delete()
+
     except ValueError as e:
         await query.edit_message_text(f"Error: {e}")
+
+    finally:
+        if filepath and os.path.exists(filepath):
+            os.remove(filepath)
 
 
 async def cancel_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
