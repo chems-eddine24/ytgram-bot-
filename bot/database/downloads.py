@@ -1,11 +1,10 @@
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
 from database.db import Base
-from sqlalchemy.orm import declarative_base
 from uuid import uuid4
 from sqlalchemy import DateTime as datetime
 
-Base = declarative_base()
+
 
 
 class Download:
