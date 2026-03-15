@@ -13,4 +13,5 @@ class User:
     id = Column(UUID(as_uuid=True),unique = True, primary_key=True, nullable=False, default=uuid4())
     telegram_id = Column(String, unique=True, nullable=False)
     telegram_username = Column(String, nullable=False)
+    first_name = Column(String, nullable=False)
     joined_at = Column(datetime(timezone=True), nullable=False)
