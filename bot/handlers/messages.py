@@ -2,6 +2,7 @@ import uuid
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from services.media_service import detect_platform
+from services.user_service import save_user
 PLATFORM_ICONS = {
     "youtube": "▶️ YouTube",
     "tiktok": "🎵 TikTok",
@@ -11,6 +12,11 @@ PLATFORM_ICONS = {
 
 
 async def url_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    await save_user(
+        telegram_id=str(user.id),
+        first_name=user.first_name,
+        username=user.username)
     text = update.message.text.strip()
     platform = detect_platform(text)
 
