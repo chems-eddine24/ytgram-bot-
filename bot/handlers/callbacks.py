@@ -2,7 +2,8 @@ import os
 from telegram import Update
 from telegram.ext import ContextTypes
 from services.media_service import download_video, download_audio
-
+from services.user_service import save_download
+from services.media_service import detect_platform
 MAX_SIZE_BYTES = 50 * 1024 * 1024
 
 
@@ -31,6 +32,10 @@ async def format_choice_callback(update: Update, context: ContextTypes.DEFAULT_T
                 await query.edit_message_text("File exceeds Telegram's 50MB limit.")
                 return
             await query.message.reply_audio(audio=open(filepath, "rb"))
+            await save_download(telegram_id=str(query.from_user.id),
+                          platform=detect_platform(url),
+                          media_type=action,
+                          url=url)
 
         elif action == "video":
             filepath = await download_video(url)
@@ -38,6 +43,11 @@ async def format_choice_callback(update: Update, context: ContextTypes.DEFAULT_T
                 await query.edit_message_text("File exceeds Telegram's 50MB limit.")
                 return
             await query.message.reply_video(video=open(filepath, "rb"))
+            await save_download(telegram_id=str(query.from_user.id),
+                          platform=detect_platform(url),
+                          media_type=action,
+                          url=url)
+
 
         await msg.delete()
 
