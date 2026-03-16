@@ -27,7 +27,7 @@ HELP_TEXT = """
 *Step 2:* Pick your format from the buttons:
   • 🎵 Audio MP3
   • 🎬 Video MP4
-  • 🎬 360p | 720p | 1080p
+  • 🎬 360p  720p  1080p
 
 *⚠️ Limitations:*
 • Files over 50MB can't be sent via Telegram
