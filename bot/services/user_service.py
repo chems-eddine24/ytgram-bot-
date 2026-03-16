@@ -1,6 +1,6 @@
 
-from database.users import User
-from database.downloads import Download
+from bot.database.models.users import User
+from bot.database.models.downloads import Download
 from database.db import get_db, AsyncSessionlocal
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -11,8 +11,8 @@ from datetime import datetime, timezone
 async def save_user(telegram_id: str, username: str, first_name: str):
     try:
         async with AsyncSessionlocal() as session:
-            stm = await session.execute(select(User).filter_by(telegram_id=telegram_id))
-            user = stm.scalars().first()
+            stm = await session.execute(select(User).where(User.telegram_id==telegram_id))
+            user = stm.scalar_one_or_none()
             if user:
                 user.first_name = first_name
                 user.telegram_username = username
@@ -23,7 +23,7 @@ async def save_user(telegram_id: str, username: str, first_name: str):
                     first_name=first_name,
                     joined_at=datetime.now(timezone.utc)
                     )
-                await session.add(add_user)
+                session.add(add_user)
                 await session.commit()
     except Exception as e:
         raise e
@@ -40,7 +40,7 @@ async def save_download(telegram_id: str, platform: str, media_type, url: str):
                 url=url,
                 wnload_at=datetime.now(timezone.utc)
                 )
-            await session.add(download)
+            session.add(download)
             await session.commit()
     except Exception as e:
         raise e
